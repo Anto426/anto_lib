@@ -6,9 +6,11 @@
   Libreria ADT in C11 con struttura modulare e build statica.
 </p>
 
----
+<p align="center">
+  <img src="./asset/divider.gif" width="440" height="40" />
+</p>
 
-## About
+## <img src="./asset/icon.gif" width="44px" /> About
 
 ```sh
 anto_lib@c:~$ whoami
@@ -23,9 +25,11 @@ anto_lib.h
 
 `anto_lib` e' una libreria C organizzata per moduli (`stack`, `queue`, `list`, `tree`, `common`, `util`) e compilata come archivio statico (`libadt.a`).
 
----
+<p align="center">
+  <img src="./asset/divider.gif" width="440" height="40" />
+</p>
 
-## Highlights
+## <img src="./asset/icon2.gif" width="48px" /> Highlights
 
 - Build libreria statica con `Makefile`
 - Header modulari in `include/`
@@ -33,9 +37,11 @@ anto_lib.h
 - Utility di debug riusabile in `util` (`debug_status`)
 - Stack gia' implementato e testato
 
----
+<p align="center">
+  <img src="./asset/divider.gif" width="440" height="40" />
+</p>
 
-## Quick Start
+## <img src="./asset/icon3.gif" width="48px" /> Quick Start
 
 ```bash
 make lib
@@ -54,17 +60,22 @@ Windows (MSYS2):
 C:\msys64\usr\bin\bash.exe -lc "export PATH=/ucrt64/bin:/usr/bin:$PATH; cd /d/Uni/programmazione2/es1 && make test_stack && ./build/bin/test_stack"
 ```
 
----
+<p align="center">
+  <img src="./asset/divider.gif" width="440" height="40" />
+</p>
 
-## Project Layout
+## <img src="./asset/icon4.gif" width="48px" /> Project Layout
 
 - `include/`: header pubblici per i moduli
 - `src/`: implementazioni dei moduli
 - `test/`: test modulari (`test_stack.c` attivo)
 - `anto_lib.h`: punto di ingresso unico opzionale
+- `asset/`: risorse grafiche del README
 - `Makefile`: build di libreria e test
 
----
+<p align="center">
+  <img src="./asset/divider.gif" width="440" height="40" />
+</p>
 
 ## Stato Attuale
 
@@ -72,7 +83,9 @@ C:\msys64\usr\bin\bash.exe -lc "export PATH=/ucrt64/bin:/usr/bin:$PATH; cd /d/Un
 - `queue`, `list`, `tree`: da completare
 - `test_queue.c`, `test_list.c`: da completare
 
----
+<p align="center">
+  <img src="./asset/divider.gif" width="440" height="40" />
+</p>
 
 ## Output Build
 
