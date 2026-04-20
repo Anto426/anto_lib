@@ -18,6 +18,21 @@ struct AdtTypeRegistry
     AdtTypeEntry **buckets;
 };
 
+static AdtStatus adt_registry_validate(const AdtTypeRegistry *registry)
+{
+    if (!registry)
+    {
+        return ADT_ERR_NULL;
+    }
+
+    if (registry->bucket_count == 0 || !registry->buckets)
+    {
+        return ADT_ERR_CORRUPTED;
+    }
+
+    return ADT_OK;
+}
+
 static uint64_t adt_hash_bytes(const void *data, size_t len)
 {
     const unsigned char *bytes = (const unsigned char *)data;
@@ -83,7 +98,7 @@ static AdtTypeEntry *adt_find_by_address(
 {
     size_t i = 0;
 
-    if (!registry || !address)
+    if (!registry || !address || !registry->buckets || registry->bucket_count == 0)
     {
         return NULL;
     }
@@ -130,6 +145,12 @@ AdtStatus adt_type_registry_create(AdtTypeRegistry **out_registry, size_t bucket
         bucket_count = 64;
     }
 
+    if (bucket_count > (SIZE_MAX / sizeof(AdtTypeEntry *)))
+    {
+        *out_registry = NULL;
+        return ADT_ERR_OVERFLOW;
+    }
+
     registry = (AdtTypeRegistry *)malloc(sizeof(AdtTypeRegistry));
     if (!registry)
     {
@@ -161,18 +182,22 @@ void adt_type_registry_destroy(AdtTypeRegistry *registry)
         return;
     }
 
-    for (i = 0; i < registry->bucket_count; ++i)
+    if (registry->buckets && registry->bucket_count > 0)
     {
-        AdtTypeEntry *curr = registry->buckets[i];
-        while (curr)
+        for (i = 0; i < registry->bucket_count; ++i)
         {
-            AdtTypeEntry *next = curr->next;
-            free(curr);
-            curr = next;
+            AdtTypeEntry *curr = registry->buckets[i];
+            while (curr)
+            {
+                AdtTypeEntry *next = curr->next;
+                free(curr);
+                curr = next;
+            }
         }
+
+        free(registry->buckets);
     }
 
-    free(registry->buckets);
     free(registry);
 }
 
@@ -188,6 +213,7 @@ AdtStatus adt_type_registry_set(
     size_t bucket = 0;
     AdtTypeEntry *entry = NULL;
     AdtStatus remove_status = ADT_OK;
+    AdtStatus validate_status = ADT_OK;
 
     if (!registry || !address)
     {
@@ -197,6 +223,17 @@ AdtStatus adt_type_registry_set(
     if (value_size > 0 && !value_bytes)
     {
         return ADT_ERR_INVALID_ARG;
+    }
+
+    validate_status = adt_registry_validate(registry);
+    if (validate_status != ADT_OK)
+    {
+        return validate_status;
+    }
+
+    if (registry->count == SIZE_MAX)
+    {
+        return ADT_ERR_OVERFLOW;
     }
 
     /*
@@ -212,6 +249,10 @@ AdtStatus adt_type_registry_set(
     value_hash = adt_value_fingerprint(value_bytes, value_size);
     key_hash = adt_key_hash(address, value_hash, value_size);
     bucket = adt_bucket_index(registry, key_hash);
+    if (bucket >= registry->bucket_count)
+    {
+        return ADT_ERR_CORRUPTED;
+    }
 
     entry = (AdtTypeEntry *)malloc(sizeof(AdtTypeEntry));
     if (!entry)
@@ -241,6 +282,7 @@ AdtStatus adt_type_registry_get(
     uint64_t key_hash = 0;
     size_t bucket = 0;
     AdtTypeEntry *curr = NULL;
+    AdtStatus validate_status = ADT_OK;
 
     if (!registry || !address || !out_type_id)
     {
@@ -252,9 +294,19 @@ AdtStatus adt_type_registry_get(
         return ADT_ERR_INVALID_ARG;
     }
 
+    validate_status = adt_registry_validate(registry);
+    if (validate_status != ADT_OK)
+    {
+        return validate_status;
+    }
+
     value_hash = adt_value_fingerprint(value_bytes, value_size);
     key_hash = adt_key_hash(address, value_hash, value_size);
     bucket = adt_bucket_index(registry, key_hash);
+    if (bucket >= registry->bucket_count)
+    {
+        return ADT_ERR_CORRUPTED;
+    }
 
     curr = registry->buckets[bucket];
     while (curr)
@@ -289,6 +341,7 @@ AdtStatus adt_type_registry_remove(
     size_t bucket = 0;
     AdtTypeEntry *prev = NULL;
     AdtTypeEntry *curr = NULL;
+    AdtStatus validate_status = ADT_OK;
 
     if (!registry || !address)
     {
@@ -300,9 +353,19 @@ AdtStatus adt_type_registry_remove(
         return ADT_ERR_INVALID_ARG;
     }
 
+    validate_status = adt_registry_validate(registry);
+    if (validate_status != ADT_OK)
+    {
+        return validate_status;
+    }
+
     value_hash = adt_value_fingerprint(value_bytes, value_size);
     key_hash = adt_key_hash(address, value_hash, value_size);
     bucket = adt_bucket_index(registry, key_hash);
+    if (bucket >= registry->bucket_count)
+    {
+        return ADT_ERR_CORRUPTED;
+    }
 
     curr = registry->buckets[bucket];
     while (curr)
@@ -311,6 +374,11 @@ AdtStatus adt_type_registry_remove(
             curr->value_hash == value_hash &&
             curr->value_size == value_size)
         {
+            if (registry->count == 0)
+            {
+                return ADT_ERR_CORRUPTED;
+            }
+
             if (prev)
             {
                 prev->next = curr->next;
@@ -342,10 +410,17 @@ AdtStatus adt_type_registry_get_by_address(
     AdtTypeId *out_type_id)
 {
     AdtTypeEntry *entry = NULL;
+    AdtStatus validate_status = ADT_OK;
 
     if (!registry || !address || !out_type_id)
     {
         return ADT_ERR_NULL;
+    }
+
+    validate_status = adt_registry_validate(registry);
+    if (validate_status != ADT_OK)
+    {
+        return validate_status;
     }
 
     entry = adt_find_by_address(registry, address, NULL, NULL);
@@ -365,16 +440,28 @@ AdtStatus adt_type_registry_remove_by_address(
     size_t bucket_index = 0;
     AdtTypeEntry *prev = NULL;
     AdtTypeEntry *entry = NULL;
+    AdtStatus validate_status = ADT_OK;
 
     if (!registry || !address)
     {
         return ADT_ERR_NULL;
     }
 
+    validate_status = adt_registry_validate(registry);
+    if (validate_status != ADT_OK)
+    {
+        return validate_status;
+    }
+
     entry = adt_find_by_address(registry, address, &bucket_index, &prev);
     if (!entry)
     {
         return ADT_ERR_NOT_FOUND;
+    }
+
+    if (registry->count == 0)
+    {
+        return ADT_ERR_CORRUPTED;
     }
 
     if (prev)
@@ -391,7 +478,34 @@ AdtStatus adt_type_registry_remove_by_address(
     return ADT_OK;
 }
 
+AdtStatus adt_type_registry_count_checked(
+    const AdtTypeRegistry *registry,
+    size_t *out_count)
+{
+    AdtStatus validate_status = ADT_OK;
+
+    if (!out_count)
+    {
+        return ADT_ERR_NULL;
+    }
+
+    validate_status = adt_registry_validate(registry);
+    if (validate_status != ADT_OK)
+    {
+        return validate_status;
+    }
+
+    *out_count = registry->count;
+    return ADT_OK;
+}
+
 size_t adt_type_registry_count(const AdtTypeRegistry *registry)
 {
-    return registry ? registry->count : 0;
+    size_t count = 0;
+    if (adt_type_registry_count_checked(registry, &count) != ADT_OK)
+    {
+        return 0;
+    }
+
+    return count;
 }

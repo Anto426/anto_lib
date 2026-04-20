@@ -82,6 +82,10 @@ AdtStatus adt_type_registry_remove_by_address(
     AdtTypeRegistry *registry,
     const void *address);
 
+AdtStatus adt_type_registry_count_checked(
+    const AdtTypeRegistry *registry,
+    size_t *out_count);
+
 size_t adt_type_registry_count(const AdtTypeRegistry *registry);
 
 /*
