@@ -1,6 +1,6 @@
 CC ?= gcc
 AR ?= ar
-CFLAGS ?= -Wall -Wextra -Wpedantic -std=c11 -Iinclude
+CFLAGS ?= -Wall -Wextra -Wpedantic -std=c11 -Iinclude -I.
 LDFLAGS ?=
 
 BUILD_DIR := build
