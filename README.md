@@ -23,7 +23,7 @@ anto_lib@c:~$ echo "entry header"
 anto_lib.h
 ```
 
-`anto_lib` e' una libreria C organizzata per moduli (`stack`, `queue`, `list`, `tree`, `common`, `util`) e compilata come archivio statico (`libadt.a`).
+`anto_lib` e' una libreria C organizzata per moduli (`stack`, `queue`, `list`, `tree`, `hash_table`, `common`, `util`) e compilata come archivio statico (`libadt.a`).
 
 <p align="center">
   <img src="./asset/divider.gif" width="440" height="40" />
@@ -35,7 +35,7 @@ anto_lib.h
 - Header modulari in `include/`
 - Header di ingresso unico opzionale: `anto_lib.h`
 - Utility di debug riusabile in `util` (`debug_status`)
-- Stack gia' implementato e testato
+- ADT principali implementati e testati (`stack`, `queue`, `list`, `tree`, `hash_table`)
 
 <p align="center">
   <img src="./asset/divider.gif" width="440" height="40" />
@@ -47,17 +47,21 @@ anto_lib.h
 make lib
 ```
 
-Test stack:
+Test completi:
 
 ```bash
-make test_stack
+make tests
 ./build/bin/test_stack
+./build/bin/test_list
+./build/bin/test_queue
+./build/bin/test_tree
+./build/bin/test_hash_table
 ```
 
 Windows (MSYS2):
 
 ```powershell
-C:\msys64\usr\bin\bash.exe -lc "export PATH=/ucrt64/bin:/usr/bin:$PATH; cd /d/Uni/programmazione2/es1 && make test_stack && ./build/bin/test_stack"
+C:\msys64\usr\bin\bash.exe -lc "export PATH=/ucrt64/bin:/usr/bin:$PATH; cd /d/Uni/programmazione2/es1 && make tests && ./build/bin/test_stack && ./build/bin/test_list && ./build/bin/test_queue && ./build/bin/test_tree && ./build/bin/test_hash_table"
 ```
 
 <p align="center">
@@ -68,7 +72,7 @@ C:\msys64\usr\bin\bash.exe -lc "export PATH=/ucrt64/bin:/usr/bin:$PATH; cd /d/Un
 
 - `include/`: header pubblici per i moduli
 - `src/`: implementazioni dei moduli
-- `test/`: test modulari (`test_stack.c` attivo)
+- `test/`: test modulari (`test_stack.c`, `test_queue.c`, `test_list.c`, `test_tree.c`, `test_hash_table.c`)
 - `anto_lib.h`: punto di ingresso unico opzionale
 - `asset/`: risorse grafiche del README
 - `Makefile`: build di libreria e test
@@ -79,9 +83,8 @@ C:\msys64\usr\bin\bash.exe -lc "export PATH=/ucrt64/bin:/usr/bin:$PATH; cd /d/Un
 
 ## Stato Attuale
 
-- `stack`: implementato e verificato
-- `queue`, `list`, `tree`: da completare
-- `test_queue.c`, `test_list.c`: da completare
+- `stack`, `queue`, `list`, `tree`, `hash_table`: implementati
+- suite test completa: `test_stack`, `test_queue`, `test_list`, `test_tree`, `test_hash_table`
 
 <p align="center">
   <img src="./asset/divider.gif" width="440" height="40" />
