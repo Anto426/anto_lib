@@ -21,7 +21,7 @@ TEST_BINS := $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/%,$(TEST_SOURCES))
 LIB_NAME := libadt.a
 LIB_PATH := $(LIB_DIR)/$(LIB_NAME)
 
-.PHONY: all lib tests test clean directories test_stack test_queue test_list
+.PHONY: all lib tests test clean directories test_stack test_queue test_list test_tree test_hash_table
 
 all: lib tests
 
@@ -51,6 +51,10 @@ test_stack: $(BIN_DIR)/test_stack
 test_queue: $(BIN_DIR)/test_queue
 
 test_list: $(BIN_DIR)/test_list
+
+test_tree: $(BIN_DIR)/test_tree
+
+test_hash_table: $(BIN_DIR)/test_hash_table
 
 clean:
 	rm -rf $(BUILD_DIR)
