@@ -81,17 +81,3 @@ C:\msys64\usr\bin\bash.exe -lc "export PATH=/ucrt64/bin:/usr/bin:$PATH; cd /d/Un
   <img src="./asset/divider.gif" width="440" height="40" />
 </p>
 
-## Stato Attuale
-
-- `stack`, `queue`, `list`, `tree`, `hash_table`: implementati
-- suite test completa: `test_stack`, `test_queue`, `test_list`, `test_tree`, `test_hash_table`
-
-<p align="center">
-  <img src="./asset/divider.gif" width="440" height="40" />
-</p>
-
-## Output Build
-
-- `build/obj/`: file oggetto
-- `build/lib/`: libreria statica
-- `build/bin/`: eseguibili
